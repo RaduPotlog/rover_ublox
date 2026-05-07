@@ -1,0 +1,50 @@
+# Configuration for ZED-F9P ROVER mode
+ublox_gps_node:
+  ros__parameters:
+    debug: 1
+    device: /dev/ttyACM0
+    frame_id: gps
+    
+    uart1:
+      baudrate: 230400
+    
+    # ROVER MODE (not base station)
+    tmode3: 0
+    
+    # HIGH UPDATE RATE
+    rate: 10.0
+    meas_rate: 100
+    nav_rate: 1
+    
+    # AUTOMOTIVE DYNAMIC MODEL
+    dmodel: 4
+    
+    # ENABLE ALL GNSS
+    gnss:
+      gps: true
+      sbas: true
+      galileo: true
+      beidou: true
+      glonass: true
+      qzss: true
+    
+    # IMPORTANT MESSAGES
+    publish:
+      all: true
+      nav:
+        posllh: true
+        pvt: true
+        sat: true
+        status: true
+        velned: true
+        svinfo: true
+        dop: true
+    
+    # CONSOLE OUTPUT
+    inf:
+      all: false
+      error: true
+      warning: true
+    
+    # SAVE CONFIG
+    save_on_shutdown: true

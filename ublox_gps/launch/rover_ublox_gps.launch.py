@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Launch the ublox gps node with c94-m8p configuration."""
+"""Launch the ublox GPS node with ZED-F9P ROVER configuration."""
 
 import os
 
@@ -40,21 +40,44 @@ import launch_ros.actions
 
 
 def generate_launch_description():
+    """Generate launch description for ZED-F9P in ROVER mode."""
+    
+    # Get config directory
     config_directory = os.path.join(
         ament_index_python.packages.get_package_share_directory('ublox_gps'),
-        'config')
-    params = os.path.join(config_directory, 'zed_f9p.yaml')
-    ublox_gps_node = launch_ros.actions.Node(package='ublox_gps',
-                                             executable='ublox_gps_node',
-                                             output='both',
-                                             parameters=[params])
+        'config'
+    )
+    
+    # ✅ USE ROVER CONFIG (10Hz, Automotive, All GNSS)
+    params = os.path.join(config_directory, 'zed_f9p_rover.yaml')
+    
+    # Log which config is being used
+    print(f"[GPS] Loading ROVER config: {params}")
+    
+    # GPS Node with respawn enabled
+    ublox_gps_node = launch_ros.actions.Node(
+        package='ublox_gps',
+        executable='ublox_gps_node',
+        name='ublox_gps_node',
+        output='both',
+        parameters=[params],
+        respawn=True,              # ✅ Auto-restart if node crashes
+        respawn_delay=2.0          # Wait 2 seconds before restarting
+    )
 
-    return launch.LaunchDescription([ublox_gps_node,
-
-                                     launch.actions.RegisterEventHandler(
-                                         event_handler=launch.event_handlers.OnProcessExit(
-                                             target_action=ublox_gps_node,
-                                             on_exit=[launch.actions.EmitEvent(
-                                                 event=launch.events.Shutdown())],
-                                         )),
-                                     ])
+    return launch.LaunchDescription([
+        ublox_gps_node,
+        
+        # Optional: Shutdown entire launch if GPS node exits
+        # Comment out this section if you want only respawn without shutdown
+        launch.actions.RegisterEventHandler(
+            event_handler=launch.event_handlers.OnProcessExit(
+                target_action=ublox_gps_node,
+                on_exit=[
+                    launch.actions.EmitEvent(
+                        event=launch.events.Shutdown()
+                    )
+                ],
+            )
+        ),
+    ])
